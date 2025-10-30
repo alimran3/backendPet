@@ -1,0 +1,7 @@
+<resources>
+    <string name="app_name">PetZone</string>
+    <string name="nav_community">Community</string>
+    <string name="nav_my_pets">My Pets</string>
+    <string name="nav_memories">Memories</string>
+    <string name="nav_profile">Profile</string>
+</resources>

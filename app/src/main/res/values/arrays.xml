@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string-array name="health_types">
+        <item>Medication</item>
+        <item>VetVisit</item>
+        <item>Vaccination</item>
+        <item>Exercise</item>
+    </string-array>
+</resources>

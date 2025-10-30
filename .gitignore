@@ -1,0 +1,56 @@
+*.iml
+.gradle
+/local.properties
+/.idea/caches
+/.idea/libraries
+/.idea/modules.xml
+/.idea/workspace.xml
+/.idea/navEditor.xml
+/.idea/assetWizardSettings.xml
+.DS_Store
+/build
+/captures
+.externalNativeBuild
+.cxx
+local.properties
+
+# Additional IDE ignores
+/.idea/**/workspace.xml
+/.idea/**/tasks.xml
+/.idea/**/gradle.xml
+/.idea/**/assetWizardSettings.xml
+/.idea/**/dictionaries
+/.idea/**/libraries
+*.ipr
+*.iws
+.vscode/
+
+# Gradle and build outputs
+**/build/
+**/captures/
+**/.gradle/
+**/.cxx/
+**/.externalNativeBuild/
+
+# Signing keys (do not commit)
+*.jks
+*.keystore
+*.keystore.properties
+signing.properties
+keystore/
+**/keystore/**
+
+# App artifacts
+*.apk
+*.ap_
+*.aar
+*.aab
+
+# Logs
+*.log
+
+# Lint
+lint/intermediates/
+lint/generated/
+lint/outputs/
+lint/tmp/
