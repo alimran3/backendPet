@@ -11,10 +11,10 @@ import retrofit2.converter.gson.GsonConverterFactory;
 import java.util.concurrent.TimeUnit;
 
 public class RetrofitClient {
-    private static final String BASE_URL = "http://192.168.1.108:3000/api/"; // Physical device on same LAN
+    private static final String BASE_URL = "https://pet-care-jade-eight.vercel.app/api/"; // Physical device on same LAN
     // For real device, use your computer's IP address
     // 10.0.2.2 is the special IP that Android emulator uses to connect to the host machine's localhost
-
+    //https://pet-care-foqa.vercel.app/api/
     private static Retrofit retrofit = null;
 
     public static Retrofit getClient() {

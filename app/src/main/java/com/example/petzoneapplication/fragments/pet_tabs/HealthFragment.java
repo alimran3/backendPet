@@ -120,9 +120,16 @@ public class HealthFragment extends Fragment {
         // Backend expects one of: Feeding, Grooming, Exercise, Medication, VetVisit, Vaccination
         payload.put("type", type);
         Map<String, Object> details = new HashMap<>();
-        details.put("title", title);
-        details.put("category", type);
         details.put("notes", notes);
+        if ("Medication".equals(type)) {
+            details.put("medicationName", title);
+        } else if ("Vaccination".equals(type)) {
+            details.put("vaccineName", title);
+        } else if ("VetVisit".equals(type)) {
+            details.put("reason", title);
+        } else if ("Exercise".equals(type)) {
+            details.put("activityType", title);
+        }
         payload.put("details", details);
 
         apiService.addCareLog("Bearer " + token, payload)
