@@ -4,15 +4,63 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:layout_margin="2dp"
-    app:cardCornerRadius="4dp"
-    app:cardElevation="0dp">
+    android:layout_margin="8dp"
+    app:cardCornerRadius="16dp"
+    app:cardElevation="8dp">
 
-    <ImageView
-        android:id="@+id/memoryImage"
+    <RelativeLayout
         android:layout_width="match_parent"
-        android:layout_height="120dp"
-        android:scaleType="centerCrop"
-        android:src="@drawable/placeholder_pet" />
+        android:layout_height="wrap_content">
+
+        <ImageView
+            android:id="@+id/memoryImage"
+            android:layout_width="match_parent"
+            android:layout_height="250dp"
+            android:scaleType="centerCrop"
+            android:src="@drawable/placeholder_pet" />
+
+        <!-- Gradient overlay for caption readability -->
+        <View
+            android:layout_width="match_parent"
+            android:layout_height="80dp"
+            android:layout_alignBottom="@id/memoryImage"
+            android:background="@drawable/gradient_overlay" />
+
+        <TextView
+            android:id="@+id/captionText"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_alignBottom="@id/memoryImage"
+            android:padding="16dp"
+            android:text="Beautiful memory"
+            android:textColor="@android:color/white"
+            android:textSize="16sp"
+            android:textStyle="bold"
+            android:maxLines="2"
+            android:ellipsize="end"
+            android:shadowColor="#80000000"
+            android:shadowDx="1"
+            android:shadowDy="1"
+            android:shadowRadius="3" />
+
+        <TextView
+            android:id="@+id/dateText"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_above="@id/captionText"
+            android:layout_alignEnd="@id/memoryImage"
+            android:layout_marginEnd="12dp"
+            android:layout_marginBottom="4dp"
+            android:background="#80000000"
+            android:paddingStart="8dp"
+            android:paddingEnd="8dp"
+            android:paddingTop="4dp"
+            android:paddingBottom="4dp"
+            android:text="Today"
+            android:textColor="@android:color/white"
+            android:textSize="12sp"
+            android:alpha="0.9" />
+
+    </RelativeLayout>
 
 </androidx.cardview.widget.CardView>

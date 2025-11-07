@@ -18,6 +18,7 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
 import androidx.recyclerview.widget.GridLayoutManager;
+import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.example.petzoneapplication.R;
@@ -87,7 +88,7 @@ public class PetMemoriesFragment extends Fragment {
         memoriesRecyclerView = view.findViewById(R.id.memoriesRecyclerView);
         addMemoryButton = view.findViewById(R.id.addMemoryButton);
 
-        memoriesRecyclerView.setLayoutManager(new GridLayoutManager(requireContext(), 3));
+        memoriesRecyclerView.setLayoutManager(new LinearLayoutManager(requireContext()));
         adapter = new MemoriesAdapter(requireContext(), memories);
         memoriesRecyclerView.setAdapter(adapter);
 
@@ -121,6 +122,37 @@ public class PetMemoriesFragment extends Fragment {
     }
 
     private void uploadMemory(Uri imageUri) {
+        // Create dialog view with caption input and share checkbox
+        android.widget.LinearLayout dialogLayout = new android.widget.LinearLayout(requireContext());
+        dialogLayout.setOrientation(android.widget.LinearLayout.VERTICAL);
+        dialogLayout.setPadding(50, 30, 50, 10);
+
+        android.widget.EditText captionInput = new android.widget.EditText(requireContext());
+        captionInput.setHint("Enter caption (optional)");
+        captionInput.setTextColor(requireContext().getColor(R.color.text_primary));
+        captionInput.setPadding(0, 0, 0, 20);
+
+        android.widget.CheckBox shareCheckbox = new android.widget.CheckBox(requireContext());
+        shareCheckbox.setText("Share to Community");
+        shareCheckbox.setTextColor(requireContext().getColor(R.color.text_primary));
+        shareCheckbox.setChecked(false);
+
+        dialogLayout.addView(captionInput);
+        dialogLayout.addView(shareCheckbox);
+
+        new androidx.appcompat.app.AlertDialog.Builder(requireContext())
+                .setTitle("Add Memory")
+                .setView(dialogLayout)
+                .setPositiveButton("Upload", (dialog, which) -> {
+                    String caption = captionInput.getText().toString().trim();
+                    boolean isShared = shareCheckbox.isChecked();
+                    performUpload(imageUri, caption, isShared);
+                })
+                .setNegativeButton("Cancel", null)
+                .show();
+    }
+
+    private void performUpload(Uri imageUri, String caption, boolean isShared) {
         try {
             ProgressDialog pd = new ProgressDialog(requireContext());
             pd.setMessage("Uploading...");
@@ -138,8 +170,8 @@ public class PetMemoriesFragment extends Fragment {
             is.close();
 
             RequestBody petIdBody = RequestBody.create(MediaType.parse("text/plain"), petId);
-            RequestBody captionBody = RequestBody.create(MediaType.parse("text/plain"), "");
-            RequestBody isSharedBody = RequestBody.create(MediaType.parse("text/plain"), "false");
+            RequestBody captionBody = RequestBody.create(MediaType.parse("text/plain"), caption.isEmpty() ? "" : caption);
+            RequestBody isSharedBody = RequestBody.create(MediaType.parse("text/plain"), String.valueOf(isShared));
             RequestBody fileBody = RequestBody.create(MediaType.parse("image/jpeg"), temp);
             MultipartBody.Part imagePart = MultipartBody.Part.createFormData("image", "memory.jpg", fileBody);
 

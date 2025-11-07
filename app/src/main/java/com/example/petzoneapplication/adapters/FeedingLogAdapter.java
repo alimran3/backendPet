@@ -4,8 +4,6 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.TextView;
-import android.widget.Button;
-import android.widget.LinearLayout;
 
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
@@ -13,25 +11,66 @@ import androidx.recyclerview.widget.RecyclerView;
 import com.example.petzoneapplication.R;
 
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 import java.util.Date;
+import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
-import java.util.HashSet;
-import java.util.Set;
 
 public class FeedingLogAdapter extends RecyclerView.Adapter<FeedingLogAdapter.ViewHolder> {
 
-    private final List<Map<String, Object>> feedingLogs;
-    private final SimpleDateFormat dateFormat = new SimpleDateFormat("MMM dd, yyyy HH:mm", Locale.getDefault());
-    private final SimpleDateFormat dayFormat = new SimpleDateFormat("MMM dd, yyyy", Locale.getDefault());
-    private final OnAddSlotClickListener listener;
+    private List<DayFeeding> dayFeedings;
+    private final List<Map<String, Object>> rawLogs;
+    private final SimpleDateFormat dateFormat = new SimpleDateFormat("MMM dd, yyyy", Locale.getDefault());
 
-    public FeedingLogAdapter(List<Map<String, Object>> feedingLogs) { this(feedingLogs, null); }
-
-    public FeedingLogAdapter(List<Map<String, Object>> feedingLogs, OnAddSlotClickListener listener) {
-        this.feedingLogs = feedingLogs;
-        this.listener = listener;
+    public FeedingLogAdapter(List<Map<String, Object>> feedingLogs) {
+        this.rawLogs = feedingLogs;
+        this.dayFeedings = groupByDate(feedingLogs);
+    }
+    
+    public void refreshData() {
+        this.dayFeedings = groupByDate(rawLogs);
+        android.util.Log.d("FeedingLogAdapter", "Grouped into " + dayFeedings.size() + " days from " + rawLogs.size() + " logs");
+        notifyDataSetChanged();
+    }
+    
+    private List<DayFeeding> groupByDate(List<Map<String, Object>> logs) {
+        Map<String, DayFeeding> grouped = new LinkedHashMap<>();
+        
+        for (Map<String, Object> log : logs) {
+            Object ts = log.get("timestamp");
+            if (ts == null) ts = log.get("createdAt");
+            if (ts == null) ts = log.get("date");
+            
+            String date = formatDate(ts);
+            Object timeSlot = getFromDetails(log, "timeSlot");
+            Object foodType = getFromDetails(log, "foodType");
+            Object amount = getFromDetails(log, "amount");
+            if (amount == null) amount = getFromDetails(log, "quantity");
+            
+            String slot = timeSlot != null ? timeSlot.toString() : "Morning";
+            String food = foodType != null ? foodType.toString() : "Pet Food";
+            String qty = amount != null ? amount.toString() : "-";
+            
+            android.util.Log.d("FeedingLogAdapter", "Processing: date=" + date + ", slot=" + slot + ", food=" + food + ", qty=" + qty);
+            
+            if (!grouped.containsKey(date)) {
+                grouped.put(date, new DayFeeding(date, food));
+            }
+            
+            DayFeeding dayFeeding = grouped.get(date);
+            if (slot.equalsIgnoreCase("Morning")) {
+                dayFeeding.morningQty = qty;
+            } else if (slot.equalsIgnoreCase("Noon")) {
+                dayFeeding.noonQty = qty;
+            } else if (slot.equalsIgnoreCase("Night")) {
+                dayFeeding.nightQty = qty;
+            }
+        }
+        
+        return new ArrayList<>(grouped.values());
     }
 
     @NonNull
@@ -43,160 +82,51 @@ public class FeedingLogAdapter extends RecyclerView.Adapter<FeedingLogAdapter.Vi
 
     @Override
     public void onBindViewHolder(@NonNull ViewHolder holder, int position) {
-        Map<String, Object> log = feedingLogs.get(position);
-        // Prefer nested details map, fallback to top-level
-        Object foodType = getFromDetails(log, "foodType");
-        // Backend uses 'amount' for Feeding quantity; support legacy 'quantity' fallback
-        Object quantity = getFromDetails(log, "amount");
-        if (quantity == null) quantity = getFromDetails(log, "quantity");
-        Object timeSlot = getFromDetails(log, "timeSlot");
-
-        holder.foodTypeTextView.setText(String.valueOf(foodType != null ? foodType : "-"));
-        holder.quantityTextView.setText(String.valueOf(quantity != null ? quantity : "-"));
-        holder.timeSlotTextView.setText(timeSlot != null ? String.valueOf(timeSlot) : "");
-
-        Object ts = log.get("timestamp");
-        if (ts == null) ts = log.get("createdAt");
-        if (ts == null) ts = log.get("date");
-        holder.timestampTextView.setText(formatDate(ts));
-
-        // Date header grouping by day
-        String currentDay = formatDay(ts);
-        String previousDay = null;
-        long currentDayStart = getDayStartMillis(ts);
-        if (position > 0) {
-            Map<String, Object> prev = feedingLogs.get(position - 1);
-            Object pts = prev.get("timestamp");
-            if (pts == null) pts = prev.get("createdAt");
-            if (pts == null) pts = prev.get("date");
-            previousDay = formatDay(pts);
-        }
-        if (position == 0 || (currentDay != null && !currentDay.equals(previousDay))) {
-            holder.dateHeaderTextView.setVisibility(View.VISIBLE);
-            holder.dateHeaderTextView.setText(currentDay != null ? currentDay : "");
-            // Show per-slot buttons for missing slots
-            if (listener != null && currentDayStart > 0) {
-                Set<String> present = getPresentSlotsForDay(currentDayStart);
-                holder.addSlotContainer.setVisibility(View.VISIBLE);
-                setupSlotButton(holder.addMorningButton, present.contains("Morning"), () -> listener.onAddSlot(currentDayStart, "Morning"));
-                setupSlotButton(holder.addNoonButton, present.contains("Noon"), () -> listener.onAddSlot(currentDayStart, "Noon"));
-                setupSlotButton(holder.addNightButton, present.contains("Night"), () -> listener.onAddSlot(currentDayStart, "Night"));
-                if (present.contains("Morning") && present.contains("Noon") && present.contains("Night")) {
-                    holder.addSlotContainer.setVisibility(View.GONE);
-                }
-            } else {
-                holder.addSlotContainer.setVisibility(View.GONE);
-                clearSlotButtons(holder);
-            }
-        } else {
-            holder.dateHeaderTextView.setVisibility(View.GONE);
-            holder.addSlotContainer.setVisibility(View.GONE);
-            clearSlotButtons(holder);
-        }
+        DayFeeding dayFeeding = dayFeedings.get(position);
+        
+        android.util.Log.d("FeedingLogAdapter", "Binding: date=" + dayFeeding.date + ", food=" + dayFeeding.foodType);
+        
+        holder.dateTextView.setText(dayFeeding.date);
+        holder.foodTypeTextView.setText(dayFeeding.foodType);
+        
+        // Set food type and quantity for each slot
+        holder.morningFood.setText(dayFeeding.foodType);
+        holder.morningQuantity.setText(dayFeeding.morningQty);
+        
+        holder.noonFood.setText(dayFeeding.foodType);
+        holder.noonQuantity.setText(dayFeeding.noonQty);
+        
+        holder.nightFood.setText(dayFeeding.foodType);
+        holder.nightQuantity.setText(dayFeeding.nightQty);
+        
+        // Calculate total
+        double total = parseQuantity(dayFeeding.morningQty) + 
+                       parseQuantity(dayFeeding.noonQty) + 
+                       parseQuantity(dayFeeding.nightQty);
+        holder.totalQuantity.setText(total > 0 ? String.format(Locale.getDefault(), "%.1f cups", total) : "-");
     }
-
-    private void setupSlotButton(Button btn, boolean alreadyPresent, Runnable onClick) {
-        if (alreadyPresent) {
-            btn.setVisibility(View.GONE);
-            btn.setOnClickListener(null);
-        } else {
-            btn.setVisibility(View.VISIBLE);
-            btn.setOnClickListener(v -> onClick.run());
+    
+    private double parseQuantity(Object qty) {
+        if (qty == null) return 0;
+        String str = qty.toString().replaceAll("[^0-9.]", "");
+        try {
+            return Double.parseDouble(str);
+        } catch (Exception e) {
+            return 0;
         }
-    }
-
-    private void clearSlotButtons(ViewHolder holder) {
-        holder.addMorningButton.setVisibility(View.GONE);
-        holder.addNoonButton.setVisibility(View.GONE);
-        holder.addNightButton.setVisibility(View.GONE);
-        holder.addMorningButton.setOnClickListener(null);
-        holder.addNoonButton.setOnClickListener(null);
-        holder.addNightButton.setOnClickListener(null);
     }
 
     private String formatDate(Object timestamp) {
-        long ms = parseToMillis(timestamp);
-        if (ms > 0) return dateFormat.format(new Date(ms));
-        return "Unknown date";
-    }
-
-    private String formatDay(Object timestamp) {
-        long ms = parseToMillis(timestamp);
-        if (ms <= 0) return null;
-        return dayFormat.format(new Date(ms));
-    }
-
-    private long getDayStartMillis(Object timestamp) {
-        long t = parseToMillis(timestamp);
-        if (t <= 0) return -1L;
-        java.util.Calendar c = java.util.Calendar.getInstance();
-        c.setTimeInMillis(t);
-        c.set(java.util.Calendar.HOUR_OF_DAY, 0);
-        c.set(java.util.Calendar.MINUTE, 0);
-        c.set(java.util.Calendar.SECOND, 0);
-        c.set(java.util.Calendar.MILLISECOND, 0);
-        return c.getTimeInMillis();
-    }
-
-    private boolean allSlotsPresentForDay(long dayStart) {
-        long start = dayStart;
-        long end = start + 24L * 60L * 60L * 1000L - 1L;
-        Set<String> present = new HashSet<>();
-        for (Map<String, Object> log : feedingLogs) {
-            Object ts = log.get("date");
-            if (ts == null) ts = log.get("timestamp");
-            if (ts == null) ts = log.get("createdAt");
-            long t = parseToMillis(ts);
-            if (t >= start && t <= end) {
-                Object slot = getFromDetails(log, "timeSlot");
-                if (slot != null) present.add(String.valueOf(slot));
-            }
+        try {
+            if (timestamp == null) return "Recent";
+            SimpleDateFormat inputFormat = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss", Locale.getDefault());
+            Date date = inputFormat.parse(timestamp.toString());
+            return dateFormat.format(date);
+        } catch (Exception e) {
+            return "Recent";
         }
-        return present.contains("Morning") && present.contains("Noon") && present.contains("Night");
     }
 
-    private Set<String> getPresentSlotsForDay(long dayStart) {
-        long start = dayStart;
-        long end = start + 24L * 60L * 60L * 1000L - 1L;
-        Set<String> present = new HashSet<>();
-        for (Map<String, Object> log : feedingLogs) {
-            Object ts = log.get("date");
-            if (ts == null) ts = log.get("timestamp");
-            if (ts == null) ts = log.get("createdAt");
-            long t = parseToMillis(ts);
-            if (t >= start && t <= end) {
-                Object slot = getFromDetails(log, "timeSlot");
-                if (slot != null) present.add(String.valueOf(slot));
-            }
-        }
-        return present;
-    }
-
-    private long parseToMillis(Object timestamp) {
-        if (timestamp == null) return -1L;
-        if (timestamp instanceof Long) return (Long) timestamp;
-        if (timestamp instanceof Number) return ((Number) timestamp).longValue();
-        if (timestamp instanceof String) {
-            String s = (String) timestamp;
-            try { return Long.parseLong(s); } catch (NumberFormatException ignored) {}
-            // Try common ISO formats
-            String[] patterns = new String[]{
-                    "yyyy-MM-dd'T'HH:mm:ss.SSS'Z'",
-                    "yyyy-MM-dd'T'HH:mm:ss'Z'",
-                    "yyyy-MM-dd'T'HH:mm:ss.SSSXXX",
-                    "yyyy-MM-dd'T'HH:mm:ssXXX"
-            };
-            for (String p : patterns) {
-                try {
-                    java.text.SimpleDateFormat iso = new java.text.SimpleDateFormat(p, java.util.Locale.US);
-                    iso.setTimeZone(java.util.TimeZone.getTimeZone("UTC"));
-                    Date d = iso.parse(s);
-                    if (d != null) return d.getTime();
-                } catch (Exception ignored2) {}
-            }
-        }
-        return -1L;
-    }
 
     @SuppressWarnings("unchecked")
     private Object getFromDetails(Map<String, Object> log, String key) {
@@ -212,29 +142,44 @@ public class FeedingLogAdapter extends RecyclerView.Adapter<FeedingLogAdapter.Vi
 
     @Override
     public int getItemCount() {
-        return feedingLogs.size();
+        return dayFeedings.size();
     }
-
-    static class ViewHolder extends RecyclerView.ViewHolder {
-        TextView dateHeaderTextView, foodTypeTextView, quantityTextView, timeSlotTextView, timestampTextView;
-        LinearLayout addSlotContainer;
-        Button addMorningButton, addNoonButton, addNightButton;
-
-        ViewHolder(@NonNull View itemView) {
-            super(itemView);
-            dateHeaderTextView = itemView.findViewById(R.id.dateHeaderTextView);
-            foodTypeTextView = itemView.findViewById(R.id.foodTypeTextView);
-            quantityTextView = itemView.findViewById(R.id.quantityTextView);
-            timeSlotTextView = itemView.findViewById(R.id.timeSlotTextView);
-            timestampTextView = itemView.findViewById(R.id.timestampTextView);
-            addSlotContainer = itemView.findViewById(R.id.addSlotContainer);
-            addMorningButton = itemView.findViewById(R.id.addMorningButton);
-            addNoonButton = itemView.findViewById(R.id.addNoonButton);
-            addNightButton = itemView.findViewById(R.id.addNightButton);
+    
+    private static class DayFeeding {
+        String date;
+        String foodType;
+        String morningQty = "-";
+        String noonQty = "-";
+        String nightQty = "-";
+        
+        DayFeeding(String date, String foodType) {
+            this.date = date;
+            this.foodType = foodType;
         }
     }
 
-    public interface OnAddSlotClickListener {
-        void onAddSlot(long dayStartMillis, String slot);
+    static class ViewHolder extends RecyclerView.ViewHolder {
+        TextView foodTypeTextView, dateTextView;
+        TextView morningFood, morningQuantity;
+        TextView noonFood, noonQuantity;
+        TextView nightFood, nightQuantity;
+        TextView totalQuantity;
+
+        ViewHolder(@NonNull View itemView) {
+            super(itemView);
+            foodTypeTextView = itemView.findViewById(R.id.foodTypeTextView);
+            dateTextView = itemView.findViewById(R.id.dateTextView);
+            
+            morningFood = itemView.findViewById(R.id.morningFood);
+            morningQuantity = itemView.findViewById(R.id.morningQuantity);
+            
+            noonFood = itemView.findViewById(R.id.noonFood);
+            noonQuantity = itemView.findViewById(R.id.noonQuantity);
+            
+            nightFood = itemView.findViewById(R.id.nightFood);
+            nightQuantity = itemView.findViewById(R.id.nightQuantity);
+            
+            totalQuantity = itemView.findViewById(R.id.totalQuantity);
+        }
     }
 }

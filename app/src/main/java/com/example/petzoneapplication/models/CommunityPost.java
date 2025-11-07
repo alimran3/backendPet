@@ -1,6 +1,7 @@
 package com.example.petzoneapplication.models;
 
 import com.google.gson.annotations.SerializedName;
+import java.util.List;
 
 public class CommunityPost {
     @SerializedName("_id")
@@ -21,8 +22,11 @@ public class CommunityPost {
     @SerializedName("careTag")
     private String careTag;
 
+    @SerializedName("likesCount")
+    private int likesCount;
+
     @SerializedName("likes")
-    private int likes;
+    private List<String> likes;
 
     @SerializedName("isLiked")
     private boolean isLiked;
@@ -79,11 +83,19 @@ public class CommunityPost {
         this.careTag = careTag;
     }
 
-    public int getLikes() {
+    public int getLikesCount() {
+        return likesCount;
+    }
+
+    public void setLikesCount(int likesCount) {
+        this.likesCount = likesCount;
+    }
+
+    public List<String> getLikes() {
         return likes;
     }
 
-    public void setLikes(int likes) {
+    public void setLikes(List<String> likes) {
         this.likes = likes;
     }
 

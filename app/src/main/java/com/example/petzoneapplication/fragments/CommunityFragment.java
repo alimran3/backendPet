@@ -2,10 +2,12 @@ package com.example.petzoneapplication.fragments;
 
 import android.content.Intent;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
@@ -24,6 +26,8 @@ import com.google.android.material.floatingactionbutton.FloatingActionButton;
 
 import java.util.ArrayList;
 import java.util.List;
+
+import retrofit2.Call;
 
 public class CommunityFragment extends Fragment {
 
@@ -77,22 +81,20 @@ public class CommunityFragment extends Fragment {
     }
 
     private void loadCommunityFeed() {
-        // Clear list and show empty state; backend integration can be enabled later
-        postList.clear();
-        adapter.notifyDataSetChanged();
-        swipeRefreshLayout.setRefreshing(false);
-        emptyView.setVisibility(View.VISIBLE);
-        recyclerView.setVisibility(View.GONE);
-
-        /* Uncomment when backend is ready
-        apiService.getCommunityFeed().enqueue(new Callback<List<CommunityPost>>() {
+        swipeRefreshLayout.setRefreshing(true);
+        Log.d("CommunityFragment", "Loading community feed...");
+        
+        try {
+            apiService.getCommunityFeed().enqueue(new retrofit2.Callback<List<CommunityPost>>() {
             @Override
-            public void onResponse(Call<List<CommunityPost>> call, Response<List<CommunityPost>> response) {
+            public void onResponse(@NonNull retrofit2.Call<List<CommunityPost>> call, @NonNull retrofit2.Response<List<CommunityPost>> response) {
                 swipeRefreshLayout.setRefreshing(false);
                 if (response.isSuccessful() && response.body() != null) {
                     postList.clear();
                     postList.addAll(response.body());
                     adapter.notifyDataSetChanged();
+
+                    Log.d("CommunityFragment", "Loaded " + postList.size() + " posts");
 
                     if (postList.isEmpty()) {
                         emptyView.setVisibility(View.VISIBLE);
@@ -101,16 +103,33 @@ public class CommunityFragment extends Fragment {
                         emptyView.setVisibility(View.GONE);
                         recyclerView.setVisibility(View.VISIBLE);
                     }
+                } else {
+                    Log.e("CommunityFragment", "Response not successful: " + response.code());
+                    Toast.makeText(getContext(), "Failed to load community posts", Toast.LENGTH_SHORT).show();
+                    emptyView.setVisibility(View.VISIBLE);
+                    recyclerView.setVisibility(View.GONE);
                 }
             }
 
             @Override
-            public void onFailure(Call<List<CommunityPost>> call, Throwable t) {
+            public void onFailure(@NonNull Call<List<CommunityPost>> call, @NonNull Throwable t) {
                 swipeRefreshLayout.setRefreshing(false);
+                Log.e("CommunityFragment", "Network error: " + t.getMessage());
+                t.printStackTrace();
+                if (getContext() != null) {
+                    Toast.makeText(getContext(), "Network error: " + t.getMessage(), Toast.LENGTH_LONG).show();
+                }
                 emptyView.setVisibility(View.VISIBLE);
                 recyclerView.setVisibility(View.GONE);
             }
         });
-        */
+        } catch (Exception e) {
+            Log.e("CommunityFragment", "Error creating request: " + e.getMessage());
+            e.printStackTrace();
+            swipeRefreshLayout.setRefreshing(false);
+            if (getContext() != null) {
+                Toast.makeText(getContext(), "Error: " + e.getMessage(), Toast.LENGTH_LONG).show();
+            }
+        }
     }
 }

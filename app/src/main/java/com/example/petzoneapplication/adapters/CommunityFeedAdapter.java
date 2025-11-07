@@ -41,7 +41,7 @@ public class CommunityFeedAdapter extends RecyclerView.Adapter<CommunityFeedAdap
         holder.petInfo.setText(post.getPetName() + " • " + post.getBreed());
         holder.caption.setText(post.getCaption());
         holder.careTag.setText(getCareTagEmoji(post.getCareTag()) + " " + post.getCareTag());
-        holder.likeCount.setText(String.valueOf(post.getLikes()));
+        holder.likeCount.setText(String.valueOf(post.getLikesCount()));
 
         if (post.getImageUrl() != null) {
             Glide.with(context)
@@ -59,9 +59,9 @@ public class CommunityFeedAdapter extends RecyclerView.Adapter<CommunityFeedAdap
             public void onClick(View v) {
                 post.setLiked(!post.isLiked());
                 if (post.isLiked()) {
-                    post.setLikes(post.getLikes() + 1);
+                    post.setLikesCount(post.getLikesCount() + 1);
                 } else {
-                    post.setLikes(post.getLikes() - 1);
+                    post.setLikesCount(post.getLikesCount() - 1);
                 }
                 notifyItemChanged(holder.getAdapterPosition());
             }

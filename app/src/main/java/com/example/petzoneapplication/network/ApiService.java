@@ -81,4 +81,24 @@ public interface ApiService {
             @Part("isShared") RequestBody isShared,
             @Part MultipartBody.Part image
     );
+
+    // Profile
+    @Multipart
+    @POST("auth/profile/photo")
+    Call<User> uploadProfilePhoto(
+            @Header("Authorization") String token,
+            @Part MultipartBody.Part image
+    );
+
+    @PUT("auth/profile")
+    Call<User> updateProfile(
+            @Header("Authorization") String token,
+            @Body Map<String, Object> updates
+    );
+
+    @POST("auth/change-password")
+    Call<Map<String, String>> changePassword(
+            @Header("Authorization") String token,
+            @Body Map<String, String> passwords
+    );
 }

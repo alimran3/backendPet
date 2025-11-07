@@ -245,6 +245,7 @@ public class FeedingFragment extends Fragment {
         setupRecyclerView();
         setupListeners();
         initDateField();
+        setSelectedSlot("Morning"); // Default to Morning
         loadFeedingLogs();
 
         return view;
@@ -252,7 +253,7 @@ public class FeedingFragment extends Fragment {
 
     private void setupRecyclerView() {
         feedingRecyclerView.setLayoutManager(new LinearLayoutManager(requireContext()));
-        adapter = new FeedingLogAdapter(feedingLogs, (dayStartMillis, slot) -> showAddSlotDialog(dayStartMillis, slot));
+        adapter = new FeedingLogAdapter(feedingLogs);
         feedingRecyclerView.setAdapter(adapter);
     }
 
@@ -274,10 +275,9 @@ public class FeedingFragment extends Fragment {
             return;
         }
 
-        // Auto-pick next available time slot for the selected date: Morning -> Noon -> Night
-        String nextSlot = getNextAvailableSlotForDay(selectedDateMillis);
-        if (nextSlot == null) {
-            Toast.makeText(requireContext(), "All slots (Morning, Noon, Night) are already logged for this day", Toast.LENGTH_LONG).show();
+        // Use the selected time slot from the buttons
+        if (selectedSlot == null || selectedSlot.isEmpty()) {
+            Toast.makeText(requireContext(), "Please select a time slot (Morning, Noon, or Night)", Toast.LENGTH_SHORT).show();
             return;
         }
 
@@ -288,7 +288,7 @@ public class FeedingFragment extends Fragment {
         details.put("foodType", foodType);
         // Backend expects 'amount' for Feeding quantity
         details.put("amount", quantity);
-        details.put("timeSlot", nextSlot);
+        details.put("timeSlot", selectedSlot);
         payload.put("details", details);
         payload.put("date", selectedDateMillis);
 
@@ -338,10 +338,30 @@ public class FeedingFragment extends Fragment {
 
     private void setSelectedSlot(String slot) {
         selectedSlot = slot;
-        // simple visual state (optional)
-        morningButton.setSelected("Morning".equals(slot));
-        noonButton.setSelected("Noon".equals(slot));
-        nightButton.setSelected("Night".equals(slot));
+        
+        // Reset all buttons to normal state
+        morningButton.setStrokeWidth(0);
+        noonButton.setStrokeWidth(0);
+        nightButton.setStrokeWidth(0);
+        
+        morningButton.setAlpha(0.6f);
+        noonButton.setAlpha(0.6f);
+        nightButton.setAlpha(0.6f);
+        
+        // Highlight selected button
+        if ("Morning".equals(slot)) {
+            morningButton.setAlpha(1.0f);
+            morningButton.setStrokeWidth(4);
+            morningButton.setStrokeColor(android.content.res.ColorStateList.valueOf(0xFF000000));
+        } else if ("Noon".equals(slot)) {
+            noonButton.setAlpha(1.0f);
+            noonButton.setStrokeWidth(4);
+            noonButton.setStrokeColor(android.content.res.ColorStateList.valueOf(0xFF000000));
+        } else if ("Night".equals(slot)) {
+            nightButton.setAlpha(1.0f);
+            nightButton.setStrokeWidth(4);
+            nightButton.setStrokeColor(android.content.res.ColorStateList.valueOf(0xFF000000));
+        }
     }
 
     private String getNextAvailableSlotForDay(long dayMillis) {
@@ -397,15 +417,20 @@ public class FeedingFragment extends Fragment {
                         if (response.isSuccessful() && response.body() != null) {
                             feedingLogs.clear();
                             feedingLogs.addAll(response.body());
+                            android.util.Log.d("FeedingFragment", "Loaded " + feedingLogs.size() + " feeding logs");
                             // Sort by date desc to ensure correct day grouping
                             java.util.Collections.sort(feedingLogs, (a, b) -> {
                                 long ta = parseToMillis(a.get("date"), a.get("timestamp"), a.get("createdAt"));
                                 long tb = parseToMillis(b.get("date"), b.get("timestamp"), b.get("createdAt"));
                                 return Long.compare(tb, ta);
                             });
-                            adapter.notifyDataSetChanged();
+                            adapter.refreshData();
+                            if (feedingLogs.isEmpty()) {
+                                Toast.makeText(requireContext(), "No feeding logs yet. Add your first meal!", Toast.LENGTH_SHORT).show();
+                            }
                         } else {
-                            Toast.makeText(requireContext(), "Failed to load feeding logs", Toast.LENGTH_SHORT).show();
+                            android.util.Log.e("FeedingFragment", "Failed to load: " + response.code());
+                            Toast.makeText(requireContext(), "Failed to load feeding logs: " + response.code(), Toast.LENGTH_SHORT).show();
                         }
                     }
 

@@ -4,7 +4,8 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:orientation="vertical"
-    android:padding="16dp">
+    android:padding="16dp"
+    android:background="@color/gray_light">
 
     <com.google.android.material.textfield.TextInputLayout
         android:layout_width="match_parent"
@@ -56,6 +57,15 @@
             android:inputType="none" />
     </com.google.android.material.textfield.TextInputLayout>
 
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Select Time Slot:"
+        android:textStyle="bold"
+        android:textSize="14sp"
+        android:textColor="@color/text_primary"
+        android:layout_marginBottom="8dp" />
+
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
@@ -64,32 +74,38 @@
 
         <com.google.android.material.button.MaterialButton
             android:id="@+id/morningButton"
-            style="@style/Widget.MaterialComponents.Button.OutlinedButton"
             android:layout_width="0dp"
-            android:layout_height="wrap_content"
+            android:layout_height="48dp"
             android:layout_weight="1"
-            android:text="Morning"
-            android:visibility="gone" />
+            android:text="☀️ Morning"
+            android:textSize="13sp"
+            android:textColor="@android:color/white"
+            app:backgroundTint="#FF9800"
+            app:cornerRadius="8dp" />
 
         <com.google.android.material.button.MaterialButton
             android:id="@+id/noonButton"
-            style="@style/Widget.MaterialComponents.Button.OutlinedButton"
             android:layout_width="0dp"
-            android:layout_height="wrap_content"
+            android:layout_height="48dp"
             android:layout_weight="1"
             android:layout_marginStart="8dp"
             android:layout_marginEnd="8dp"
-            android:text="Noon"
-            android:visibility="gone" />
+            android:text="☀️ Noon"
+            android:textSize="13sp"
+            android:textColor="@android:color/white"
+            app:backgroundTint="#FFC107"
+            app:cornerRadius="8dp" />
 
         <com.google.android.material.button.MaterialButton
             android:id="@+id/nightButton"
-            style="@style/Widget.MaterialComponents.Button.OutlinedButton"
             android:layout_width="0dp"
-            android:layout_height="wrap_content"
+            android:layout_height="48dp"
             android:layout_weight="1"
-            android:text="Night"
-            android:visibility="gone" />
+            android:text="🌙 Night"
+            android:textSize="13sp"
+            android:textColor="@android:color/white"
+            app:backgroundTint="#3F51B5"
+            app:cornerRadius="8dp" />
     </LinearLayout>
 
     <com.google.android.material.button.MaterialButton

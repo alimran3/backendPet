@@ -1,85 +1,279 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<androidx.cardview.widget.CardView xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:orientation="vertical"
-    android:padding="16dp">
-
-    <TextView
-        android:id="@+id/dateHeaderTextView"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:textStyle="bold"
-        android:textSize="16sp"
-        android:textColor="@color/text_primary"
-        android:layout_marginBottom="4dp"
-        android:visibility="gone" />
+    android:layout_margin="8dp"
+    app:cardCornerRadius="12dp"
+    app:cardElevation="4dp">
 
     <LinearLayout
-        android:id="@+id/addSlotContainer"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:orientation="horizontal"
-        android:layout_marginBottom="8dp"
-        android:visibility="gone">
+        android:orientation="vertical"
+        android:padding="16dp"
+        android:background="@color/gray_light">
 
-        <Button
-            android:id="@+id/addMorningButton"
-            android:layout_width="0dp"
+        <!-- Header with Food Icon and Date -->
+        <LinearLayout
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_weight="1"
-            android:text="Add Morning"
-            android:visibility="gone" />
+            android:orientation="horizontal"
+            android:gravity="center_vertical"
+            android:layout_marginBottom="16dp">
 
-        <Button
-            android:id="@+id/addNoonButton"
-            android:layout_width="0dp"
-            android:layout_height="wrap_content"
-            android:layout_weight="1"
-            android:layout_marginStart="8dp"
-            android:layout_marginEnd="8dp"
-            android:text="Add Noon"
-            android:visibility="gone" />
+            <TextView
+                android:layout_width="48dp"
+                android:layout_height="48dp"
+                android:gravity="center"
+                android:text="🍽️"
+                android:textSize="24sp"
+                android:background="@drawable/circle_background"
+                android:backgroundTint="#FFF3E0" />
 
-        <Button
-            android:id="@+id/addNightButton"
-            android:layout_width="0dp"
+            <LinearLayout
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:orientation="vertical"
+                android:layout_marginStart="12dp">
+
+                <TextView
+                    android:id="@+id/dateTextView"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Nov 7, 2025"
+                    android:textSize="16sp"
+                    android:textStyle="bold"
+                    android:textColor="@color/text_primary"
+                    android:layout_marginBottom="4dp" />
+
+                <TextView
+                    android:id="@+id/foodTypeTextView"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Dog Food"
+                    android:textSize="13sp"
+                    android:textStyle="italic"
+                    android:textColor="@color/text_primary" />
+
+            </LinearLayout>
+
+        </LinearLayout>
+
+        <!-- Divider -->
+        <View
+            android:layout_width="match_parent"
+            android:layout_height="1dp"
+            android:background="#20000000"
+            android:layout_marginBottom="12dp" />
+
+        <!-- Time Slots Grid -->
+        <LinearLayout
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_weight="1"
-            android:text="Add Night"
-            android:visibility="gone" />
+            android:orientation="horizontal"
+            android:weightSum="3">
+
+            <!-- Morning Slot -->
+            <LinearLayout
+                android:id="@+id/morningSlot"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:orientation="vertical"
+                android:padding="8dp"
+                android:background="@drawable/time_slot_background"
+                android:backgroundTint="#FFF8E1"
+                android:layout_marginEnd="4dp">
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="☀️"
+                    android:textSize="20sp"
+                    android:layout_gravity="center_horizontal"
+                    android:layout_marginBottom="4dp" />
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Morning"
+                    android:textSize="11sp"
+                    android:textStyle="bold"
+                    android:textColor="#F57C00"
+                    android:layout_gravity="center_horizontal"
+                    android:layout_marginBottom="6dp" />
+
+                <TextView
+                    android:id="@+id/morningFood"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Dog Food"
+                    android:textSize="10sp"
+                    android:textStyle="italic"
+                    android:textColor="@color/text_secondary"
+                    android:layout_gravity="center_horizontal"
+                    android:maxLines="1"
+                    android:ellipsize="end"
+                    android:layout_marginBottom="2dp" />
+
+                <TextView
+                    android:id="@+id/morningQuantity"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="2 cups"
+                    android:textSize="13sp"
+                    android:textStyle="bold"
+                    android:textColor="@color/text_primary"
+                    android:layout_gravity="center_horizontal" />
+
+            </LinearLayout>
+
+            <!-- Noon Slot -->
+            <LinearLayout
+                android:id="@+id/noonSlot"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:orientation="vertical"
+                android:padding="8dp"
+                android:background="@drawable/time_slot_background"
+                android:backgroundTint="#FFF9C4"
+                android:layout_marginStart="4dp"
+                android:layout_marginEnd="4dp">
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="☀️"
+                    android:textSize="20sp"
+                    android:layout_gravity="center_horizontal"
+                    android:layout_marginBottom="4dp" />
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Noon"
+                    android:textSize="11sp"
+                    android:textStyle="bold"
+                    android:textColor="#F9A825"
+                    android:layout_gravity="center_horizontal"
+                    android:layout_marginBottom="6dp" />
+
+                <TextView
+                    android:id="@+id/noonFood"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Dog Food"
+                    android:textSize="10sp"
+                    android:textStyle="italic"
+                    android:textColor="@color/text_secondary"
+                    android:layout_gravity="center_horizontal"
+                    android:maxLines="1"
+                    android:ellipsize="end"
+                    android:layout_marginBottom="2dp" />
+
+                <TextView
+                    android:id="@+id/noonQuantity"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="1.5 cups"
+                    android:textSize="13sp"
+                    android:textStyle="bold"
+                    android:textColor="@color/text_primary"
+                    android:layout_gravity="center_horizontal" />
+
+            </LinearLayout>
+
+            <!-- Night Slot -->
+            <LinearLayout
+                android:id="@+id/nightSlot"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:orientation="vertical"
+                android:padding="8dp"
+                android:background="@drawable/time_slot_background"
+                android:backgroundTint="#E8EAF6"
+                android:layout_marginStart="4dp">
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="🌙"
+                    android:textSize="20sp"
+                    android:layout_gravity="center_horizontal"
+                    android:layout_marginBottom="4dp" />
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Night"
+                    android:textSize="11sp"
+                    android:textStyle="bold"
+                    android:textColor="#3949AB"
+                    android:layout_gravity="center_horizontal"
+                    android:layout_marginBottom="6dp" />
+
+                <TextView
+                    android:id="@+id/nightFood"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Dog Food"
+                    android:textSize="10sp"
+                    android:textStyle="italic"
+                    android:textColor="@color/text_secondary"
+                    android:layout_gravity="center_horizontal"
+                    android:maxLines="1"
+                    android:ellipsize="end"
+                    android:layout_marginBottom="2dp" />
+
+                <TextView
+                    android:id="@+id/nightQuantity"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="2 cups"
+                    android:textSize="13sp"
+                    android:textStyle="bold"
+                    android:textColor="@color/text_primary"
+                    android:layout_gravity="center_horizontal" />
+
+            </LinearLayout>
+
+        </LinearLayout>
+
+        <!-- Total Section -->
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:gravity="center_vertical"
+            android:background="@drawable/time_slot_background"
+            android:backgroundTint="#E8F5E9"
+            android:padding="12dp"
+            android:layout_marginTop="12dp">
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Total Daily:"
+                android:textSize="13sp"
+                android:textStyle="bold"
+                android:textColor="#388E3C" />
+
+            <TextView
+                android:id="@+id/totalQuantity"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="5.5 cups"
+                android:textSize="15sp"
+                android:textStyle="bold"
+                android:textColor="#388E3C"
+                android:layout_marginStart="8dp" />
+
+        </LinearLayout>
+
     </LinearLayout>
 
-    <TextView
-        android:id="@+id/foodTypeTextView"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:textSize="16sp"
-        android:textStyle="bold"
-        android:textColor="@color/text_primary" />
-
-    <TextView
-        android:id="@+id/quantityTextView"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:textSize="14sp"
-        android:textColor="@color/text_secondary"
-        android:layout_marginTop="4dp" />
-
-    <TextView
-        android:id="@+id/timeSlotTextView"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:textSize="14sp"
-        android:textColor="@color/text_secondary"
-        android:layout_marginTop="2dp" />
-
-    <TextView
-        android:id="@+id/timestampTextView"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:textSize="12sp"
-        android:textColor="@android:color/darker_gray"
-        android:layout_marginTop="4dp" />
-
-</LinearLayout>
+</androidx.cardview.widget.CardView>
